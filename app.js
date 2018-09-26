@@ -44,25 +44,10 @@ const selectPiece = (input) => {
     return selectedPiece;
 }
 
-const promptUser = prompt => conif.getConsoleInput(prompt, false);
+const promptUser = prompt => conif.getConsoleInput(prompt + ' ', false);
 
-const checkLocation = (input, selectedPiece) => {
-    const { x, y, type } = selectedPiece;
-    
-    if (input.length !== 2) {
-        console.log('wrong format');
-        return;
-    }
-
-    const [col, row] = input;
-    if (!'abcdefghij'.includes(col) || !'0123456789'.includes(row)) {
-        console.log('wrong format');
-        return;
-    }
-
-    const x2 = col.charCodeAt(0) - 97;
-    const y2 = parseInt(row);
-
+const checkIfMoveIsValid = (selectedPiece, x2, y2) => {
+    const { x, y } = selectedPiece;
     const diffX = x2 - x;
     const diffY = y2 - y;
 
@@ -94,20 +79,6 @@ const checkLocation = (input, selectedPiece) => {
     }
     
     return { x: x2, y: y2 };
-}
-
-const userSelectLocation = selectedPiece => {
-    let selectedLocation;
-    do {
-        const input = conif.getConsoleInput(`${game.turn} select destination (b3): `, false);
-        const canMove = checkLocation(input, selectedPiece)
-        if (canMove) {
-            console.log('canMove', canMove);
-            selectedLocation = canMove;
-        }
-    } while (!selectedLocation)
-
-    return selectedLocation;
 }
 
 const swapPieces = (x, y, selectedPiece) => {
@@ -251,10 +222,11 @@ const getUserActions = userInput => {
 
     if (inputFrom.length !== 2) return;
 
-    const [fromX, fromY] = inputFrom;
-    if (!'abcdefghij'.includes(fromX) || !'01234567'.includes(fromY)) return;
+    const [fromXText, fromYText] = inputFrom;
+    if (!'abcdefghij'.includes(fromXText) || !'01234567'.includes(fromYText)) return;
 
-    const selectedPiece = game.board[parseInt(fromY)][fromX.charCodeAt(0) - 97];
+    const x = fromXText.charCodeAt(0) - 97;
+    const y = parseInt(fromYText);
 
     if (!selectedPiece) {
         console.log('no piece there');
@@ -266,11 +238,14 @@ const getUserActions = userInput => {
         return;
     }
 
-    if ('lr'.includes(inputTo)) return { rotate: inputTo, selectedPiece };
+    if ('lr'.includes(inputTo)) return { rotate: inputTo, start: { x, y } };
 
-    const [x, y] = inputTo;
+    const [toXText, toYText] = inputTo;
+    if (!'abcdefghij'.includes(toXText) || !'01234567'.includes(toYText)) return;
+    const toX = toXText.charCodeAt(0) - 97;
+    const toY = parseInt(toYText);
 
-    return { selectedPiece, dest: { x, y } };
+    return { start: { x, y }, dest: { x: toX, y: toY } };
 }
 
 const gameLoop = () => {
@@ -278,13 +253,24 @@ const gameLoop = () => {
 
     const userInput = promptUser(`e.g. c4 c5\n${game.turn}'s Turn:`);
 
-    const { selectedPiece, rotate, dest } = getUserActions(userInput);
+    const userActions = getUserActions(userInput);
 
-    const selectedAction = userSelectAction(selectedPiece);
+    if (!userActions) return;
+
+    const { start, dest, rotate } = userActions;
+
+    const selectedPiece = game.board[start.y][start.x];
+
+    if (!selectedPiece) throw `nothing to move`;
+    if (selectedPiece.colour !== game.turn) throw `not your piece`;
+    if (selectedPiece.type === 'laser' && dest) throw `you can't move your laser`;
     
-    if (selectedAction === 'move') {
-        const { y, x } = userSelectLocation(selectedPiece);
-        swapPieces(x, y, selectedPiece)
+    if (dest) {
+        const moveValid = checkIfMoveIsValid(selectedPiece, dest);
+        if (!moveValid) throw 'invalid move';
+
+        const { y, x } = moveValid;
+        swapPieces(x, y, selectedPiece);
 
         fireLaser(game.turn);
     
