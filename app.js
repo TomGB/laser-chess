@@ -23,56 +23,28 @@ const game = setupGame();
 // console.log(config.restrictedLocations);
 
 const selectPiece = (input) => {
-    if (input.length === 2){
-        const [col, row] = input;
-    
-        if (!'abcdefghij'.includes(col) || !'01234567'.includes(row)) {
-            console.log('wrong format');
-        } else {
-            const selectedPiece = game.board[parseInt(row)][col.charCodeAt(0) - 97];
-    
-            if (!selectedPiece) {
-                console.log('no piece there');
-            } else if (selectedPiece.colour !== game.turn) {
-                console.log('not your colour');
-            } else {
-                return selectedPiece;
-            }
-        }
-    }
-}
+    if (input.length !== 2) return;
 
-const userSelectPiece = () => {
-    let selectedPiece;
-    do {
-        const input = conif.getConsoleInput(`${game.turn} Select Piece (b3): `, false);
-        selectedPiece = selectPiece(input);
-    } while (!selectedPiece)
+    const [col, row] = input;
+
+    if (!'abcdefghij'.includes(col) || !'01234567'.includes(row)) return;
+
+    const selectedPiece = game.board[parseInt(row)][col.charCodeAt(0) - 97];
+
+    if (!selectedPiece) {
+        console.log('no piece there');
+        return;
+    }
+    
+    if (selectedPiece.colour !== game.turn) {
+        console.log('not your colour');
+        return;
+    }
 
     return selectedPiece;
 }
 
-const getPossibleActions = ({ type }) => {
-    if (type === 'laser') return ['rotate'];
-    return ['rotate', 'move'];
-}
-
-const userSelectAction = selectedPiece => {
-    let selectedAction;
-    do {
-        const possible = getPossibleActions(selectedPiece);
-        if (possible.length === 1) {
-            selectedAction = possible[0];
-        } else {
-            const input = conif.getConsoleInput(`${game.turn} select move or rotate: `, false);
-            if (possible.includes(input)) {
-                selectedAction = input;
-            }
-        }
-    } while (!selectedAction)
-
-    return selectedAction;
-}
+const promptUser = prompt => conif.getConsoleInput(prompt, false);
 
 const checkLocation = (input, selectedPiece) => {
     const { x, y, type } = selectedPiece;
@@ -102,17 +74,17 @@ const checkLocation = (input, selectedPiece) => {
     // console.log('destination', destination);
 
     if (type !== 'mirror' && destination) {
-        console.log('can\'t swap non mirror pieces')
+        console.log(`can't swap non mirror piece`);
         return;
     }
 
     if (type === 'mirror' && destination && (['king', 'mirror'].includes(destination.type))) {
-        console.log('can\'t swap with a king or mirror');
+        console.log(`can't swap with a king or mirror`);
         return;
     }
 
     if (destination && destination.type === 'laser') {
-        console.log('can\'t go on laser');
+        console.log(`can't go on laser`);
         return;
     }
 
@@ -181,7 +153,7 @@ const hitLogic = (piece, laser) => ({
     block: () => {
         if (piece.rotation === inverseDirection[laser.direction]) {
             console.log('blocked');
-            return;
+            return { blocked: true };
         }
 
         return { hit: piece };
@@ -206,7 +178,7 @@ const hitLogic = (piece, laser) => ({
         console.log('reflected', newDirection);
         return { newDirection };
     },
-    laser: () => console.log('nada')
+    laser: () => ({ nothing: true }),
 })
 
 const runLaserPath = laser => {
@@ -248,7 +220,7 @@ const runLaserPath = laser => {
 
 const fireLaser = turn => {
     if (turn === 'red') {
-        redLaser = game.board[0][0];
+        const redLaser = game.board[0][0];
 
         if (redLaser.rotation === 'D') {
             let laser = { x: 0, y: 1, direction: 'D' };
@@ -260,23 +232,54 @@ const fireLaser = turn => {
     }
 
     if (turn === 'white') {
-        redLaser = game.board[0][0];
+        const whiteLaser = game.board[config.height - 1][config.width - 1];
 
-        if (redLaser.rotation === 'U') {
-            let laser = { x: 0, y: 1, direction: 'U' };
+        if (whiteLaser.rotation === 'U') {
+            let laser = { x: config.width - 1, y: config.height - 2, direction: 'U' };
+            console.log(laser);
+            
             runLaserPath(laser);
         } else {
-            let laser = { x: 0, y: 1, direction: 'L' };
+            let laser = { x: config.width - 2, y: config.height - 1, direction: 'L' };
             runLaserPath(laser);
         }
     }
 }
 
+const getUserActions = userInput => {
+    const [inputFrom, inputTo] = userInput.split(' ');
+
+    if (inputFrom.length !== 2) return;
+
+    const [fromX, fromY] = inputFrom;
+    if (!'abcdefghij'.includes(fromX) || !'01234567'.includes(fromY)) return;
+
+    const selectedPiece = game.board[parseInt(fromY)][fromX.charCodeAt(0) - 97];
+
+    if (!selectedPiece) {
+        console.log('no piece there');
+        return;
+    }
+    
+    if (selectedPiece.colour !== game.turn) {
+        console.log('not your colour');
+        return;
+    }
+
+    if ('lr'.includes(inputTo)) return { rotate: inputTo, selectedPiece };
+
+    const [x, y] = inputTo;
+
+    return { selectedPiece, dest: { x, y } };
+}
+
 const gameLoop = () => {
     drawPieces(game.board);
-    
-    const selectedPiece = userSelectPiece();
-    
+
+    const userInput = promptUser(`e.g. c4 c5\n${game.turn}'s Turn:`);
+
+    const { selectedPiece, rotate, dest } = getUserActions(userInput);
+
     const selectedAction = userSelectAction(selectedPiece);
     
     if (selectedAction === 'move') {

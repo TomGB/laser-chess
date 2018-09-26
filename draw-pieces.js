@@ -50,7 +50,7 @@ const printColours = board => {
     console.log('');
 }
 
-const COLOUR_END = '\x1b[0m';
+const COLOUR_END = '\x1b[31mbanana\x1b[0m';
 const COLOUR_MAP = {
     red: '\x1b[31m',
     grey: '\x1b[2m',
