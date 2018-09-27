@@ -46,8 +46,10 @@ const selectPiece = (input) => {
 
 const promptUser = prompt => conif.getConsoleInput(prompt + ' ', false);
 
-const checkIfMoveIsValid = (selectedPiece, x2, y2) => {
-    const { x, y } = selectedPiece;
+const checkIfMoveIsValid = (selectedPiece, { x: x2, y: y2 }) => {
+    const { x, y, type } = selectedPiece;
+    console.log(x, y, x2, y2);
+    
     const diffX = x2 - x;
     const diffY = y2 - y;
 
@@ -228,16 +230,6 @@ const getUserActions = userInput => {
     const x = fromXText.charCodeAt(0) - 97;
     const y = parseInt(fromYText);
 
-    if (!selectedPiece) {
-        console.log('no piece there');
-        return;
-    }
-    
-    if (selectedPiece.colour !== game.turn) {
-        console.log('not your colour');
-        return;
-    }
-
     if ('lr'.includes(inputTo)) return { rotate: inputTo, start: { x, y } };
 
     const [toXText, toYText] = inputTo;
@@ -245,29 +237,27 @@ const getUserActions = userInput => {
     const toX = toXText.charCodeAt(0) - 97;
     const toY = parseInt(toYText);
 
-    return { start: { x, y }, dest: { x: toX, y: toY } };
+    return { start: { x, y }, move: { x: toX, y: toY } };
 }
 
-const gameLoop = () => {
-    drawPieces(game.board);
-
+const takeTurn = () => {
     const userInput = promptUser(`e.g. c4 c5\n${game.turn}'s Turn:`);
 
     const userActions = getUserActions(userInput);
 
     if (!userActions) return;
 
-    const { start, dest, rotate } = userActions;
+    const { start, userAction, move, rotate } = userActions;
 
     const selectedPiece = game.board[start.y][start.x];
 
-    if (!selectedPiece) throw `nothing to move`;
-    if (selectedPiece.colour !== game.turn) throw `not your piece`;
-    if (selectedPiece.type === 'laser' && dest) throw `you can't move your laser`;
+    if (!selectedPiece) return console.log(`nothing to move`);
+    if (selectedPiece.colour !== game.turn) return console.log(`not your piece`);
+    if (selectedPiece.type === 'laser' && move) return console.log(`you can't move your laser`);
     
-    if (dest) {
-        const moveValid = checkIfMoveIsValid(selectedPiece, dest);
-        if (!moveValid) throw 'invalid move';
+    if (move) {
+        const moveValid = checkIfMoveIsValid(selectedPiece, move);
+        if (!moveValid) return console.log('invalid move');
 
         const { y, x } = moveValid;
         swapPieces(x, y, selectedPiece);
@@ -275,10 +265,27 @@ const gameLoop = () => {
         fireLaser(game.turn);
     
         game.turn = game.turn === 'red' ? 'white' : 'red';
-        gameLoop();
+
+        return true;
     } else {
         const selectedDirection = userSelectDirection(selectedPiece);
-    }    
+
+
+
+        return true;
+    }
+}
+
+const gameLoop = () => {
+    drawPieces(game.board);
+
+    let moveTaken = false;
+
+    do {
+        moveTaken = takeTurn();
+    } while (!moveTaken);
+
+    gameLoop();
 }
 
 gameLoop();
