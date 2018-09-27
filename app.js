@@ -9,15 +9,6 @@ const config = {
 
 debug = true;
 
-const userCancel = [
-    'cancel',
-    'stop',
-    'c',
-    's',
-    'undo',
-    'u'
-];
-
 const game = setupGame();
 
 // console.log(config.restrictedLocations);
@@ -36,7 +27,7 @@ const selectPiece = (input) => {
         return;
     }
     
-    if (selectedPiece.colour !== game.turn) {
+    if (selectedPiece.colour !== game.turn && !debug) {
         console.log('not your colour');
         return;
     }

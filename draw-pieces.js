@@ -1,3 +1,13 @@
+const config = {
+    width: 10,
+    height: 8,
+    restrictedLocations: [
+        ['none', 'white', ...Array(6), 'red', 'white'],
+        ...Array(6).fill().map(() => ['red', ...Array(8), 'white']),
+        ['red', 'white', ...Array(6), 'red', 'none']
+    ],
+}
+
 const symbols = {
     RD: '◸',
     DL: '◹',
@@ -54,6 +64,8 @@ const COLOUR_END = '\x1b[0m';
 const COLOUR_MAP = {
     red: '\x1b[31m',
     grey: '\x1b[2m',
+    greyred: '\x1b[31m\x1b[2m',
+
 };
 
 const draw = (str, colour) => {
@@ -72,7 +84,14 @@ const drawPieces = board => {
         }
         row.forEach((piece, xIndex) => {
             if (xIndex === 0) draw(index + '   ');
-            if (!piece) return draw('⬚ ', 'grey');
+            if (!piece) {
+                if (config.restrictedLocations[index][xIndex] === 'red') {
+                    return draw('⬚ ', 'greyred');
+                } else if (config.restrictedLocations[index][xIndex] === 'white') {
+                    return draw('⬚ ', 'greywhite');
+                }
+                return draw('⬚ ', 'grey');
+            } 
             if (piece.type === 'mirror') return draw(mirrorSymbols[piece.rotation] + ' ', piece.colour);
             if (piece.type === 'king') return draw('♔ ', piece.colour);
             if (piece.type === 'block') return draw(blockerSymbols[piece.rotation] + ' ', piece.colour);
