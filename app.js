@@ -50,8 +50,10 @@ const checkIfMoveIsValid = (selectedPiece, { x: x2, y: y2 }) => {
 
     const destination = game.board[y2][x2];
 
-    if (config.restrictedLocations[y2][x2] !== selectedPiece.colour) {
-        console.log(`restricted space, ${config.restrictedLocations[y2][x2]} only`);
+    const restriction = config.restrictedLocations[y2][x2];
+
+    if (restriction && restriction !== selectedPiece.colour) {
+        console.log(`restricted space, ${restriction} only`);
         return;
     }
 

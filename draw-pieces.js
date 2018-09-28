@@ -88,11 +88,11 @@ const drawPieces = board => {
             if (xIndex === 0) draw(index + '   ');
             if (!piece) {
                 if (config.restrictedLocations[index][xIndex] === 'red') {
-                    return draw('⬚ ', 'greyred');
+                    return draw('· ', 'greyred');
                 } else if (config.restrictedLocations[index][xIndex] === 'white') {
-                    return draw('⬚ ', 'greywhite');
+                    return draw('· ', 'grey');
                 }
-                return draw('⬚ ', 'grey');
+                return draw('  ', 'grey');
             } 
             if (piece.type === 'mirror') return draw(mirrorSymbols[piece.rotation] + ' ', piece.colour);
             if (piece.type === 'king') return draw('♔ ', piece.colour);
