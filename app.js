@@ -5,6 +5,11 @@ const conif = require('node-console-input');
 const config = {
     width: 10,
     height: 8,
+    restrictedLocations: [
+        ['none', 'white', ...Array(6), 'red', 'white'],
+        ...Array(6).fill().map(() => ['red', ...Array(8), 'white']),
+        ['red', 'white', ...Array(6), 'red', 'none']
+    ],
 }
 
 debug = true;
@@ -19,8 +24,6 @@ const userCancel = [
 ];
 
 const game = setupGame();
-
-// console.log(config.restrictedLocations);
 
 const selectPiece = (input) => {
     if (input.length !== 2) return;
@@ -58,7 +61,10 @@ const checkIfMoveIsValid = (selectedPiece, { x: x2, y: y2 }) => {
     
     const destination = game.board[y2][x2];
 
-    // console.log('destination', destination);
+    if (config.restrictedLocations[y2][x2] !== selectedPiece.colour) {
+        console.log(`restricted space, ${config.restrictedLocations[y2][x2]} only`);
+        return;
+    }
 
     if (type !== 'mirror' && destination) {
         console.log(`can't swap non mirror piece`);
