@@ -1,12 +1,4 @@
-const config = {
-    width: 10,
-    height: 8,
-    restrictedLocations: [
-        ['none', 'white', ...Array(6), 'red', 'white'],
-        ...Array(6).fill().map(() => ['red', ...Array(8), 'white']),
-        ['red', 'white', ...Array(6), 'red', 'none']
-    ],
-}
+const config = require('./config');
 
 const symbols = {
     RD: '◸',
@@ -43,23 +35,6 @@ const blockerSymbols = {
     R: '⤨'
 }
 
-const printColours = board => {
-    board.forEach((row, index) => {
-        if (index === 0) {
-            console.log('\n\n    a b c d e f g h i j\n');
-        }
-        row.forEach((piece, xIndex) => {
-            if (xIndex === 0) process.stdout.write(index + '   ');
-            if (!piece) return process.stdout.write('_ ');
-            if (piece.colour === 'red') return process.stdout.write('R ');
-            if (piece.colour === 'white') return process.stdout.write('W ');
-            throw Error('invalid colour');
-        })
-        console.log('');
-    })
-    console.log('');
-}
-
 const COLOUR_END = '\x1b[0m';
 const COLOUR_MAP = {
     red: '\x1b[31m',
@@ -77,8 +52,13 @@ const draw = (str, colour) => {
     }
 }
 
-const drawPieces = board => {
+const drawPieces = game => {
+    const { board, message } = game;
+
     process.stdout.write('\033c');
+
+    console.log(message);
+    game.message = '';
 
     board.forEach((row, index) => {
         if (index === 0) {
