@@ -78,6 +78,8 @@ const draw = (str, colour) => {
 }
 
 const drawPieces = board => {
+    process.stdout.write('\033c');
+
     board.forEach((row, index) => {
         if (index === 0) {
             console.log('\n    a b c d e f g h i j\n');
