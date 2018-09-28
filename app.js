@@ -19,28 +19,6 @@ debug = true;
 
 const game = setupGame();
 
-const selectPiece = (input) => {
-    if (input.length !== 2) return;
-
-    const [col, row] = input;
-
-    if (!'abcdefghij'.includes(col) || !'01234567'.includes(row)) return;
-
-    const selectedPiece = game.board[parseInt(row)][col.charCodeAt(0) - 97];
-
-    if (!selectedPiece) {
-        console.log('no piece there');
-        return;
-    }
-    
-    if (selectedPiece.colour !== game.turn && !debug) {
-        console.log('not your colour');
-        return;
-    }
-
-    return selectedPiece;
-}
-
 const promptUser = prompt => conif.getConsoleInput(prompt + ' ', false);
 
 const checkIfMoveIsValid = (selectedPiece, { x: x2, y: y2 }) => {
@@ -295,24 +273,28 @@ const takeTurn = userActions => {
 
     const selectedPiece = game.board[start.y][start.x];
 
-    if (!selectedPiece){
+    if (!selectedPiece) {
+        console.log(`nothing to move`)
         userInputEvents.emit('getInput')
-        return console.log(`nothing to move`)
+        return
     }
     if (selectedPiece.colour !== game.turn) {
+        console.log(`not your piece`)
         userInputEvents.emit('getInput')
-        return console.log(`not your piece`)
+        return
     }
     if (selectedPiece.type === 'laser' && move) {
+        console.log(`you can't move your laser`)
         userInputEvents.emit('getInput')
-        return console.log(`you can't move your laser`);
+        return
     } 
     
     if (move) {
         const validMove = checkIfMoveIsValid(selectedPiece, move);
         if (!validMove) {
+            console.log('invalid move')
             userInputEvents.emit('getInput')
-            return console.log('invalid move')
+            return
         }
 
         swapPieces(validMove, selectedPiece);
@@ -322,8 +304,9 @@ const takeTurn = userActions => {
     } else {
         const validRotate = rotatePiece(selectedPiece, rotate);
         if (!validRotate) {
+            console.log('invalid validRotate')
             userInputEvents.emit('getInput')
-            return console.log('invalid validRotate')
+            return
         }
 
         userInputEvents.emit('finishTurn')
@@ -333,8 +316,6 @@ const takeTurn = userActions => {
 
 const gameLoop = () => {
     drawPieces(game.board);
-
-    let moveTaken = false;
 
     userInputEvents.emit('getInput');
 }
