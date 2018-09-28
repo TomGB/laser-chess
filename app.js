@@ -2,21 +2,15 @@ const setupGame = require('./setup-game');
 const drawPieces = require('./draw-pieces')
 const conif = require('node-console-input');
 
+const EventEmitter = require('events').EventEmitter;
+const userInputEvents = new EventEmitter;
+
 const config = {
     width: 10,
     height: 8,
 }
 
 debug = true;
-
-const userCancel = [
-    'cancel',
-    'stop',
-    'c',
-    's',
-    'undo',
-    'u'
-];
 
 const game = setupGame();
 
@@ -36,7 +30,7 @@ const selectPiece = (input) => {
         return;
     }
     
-    if (selectedPiece.colour !== game.turn) {
+    if (selectedPiece.colour !== game.turn && !debug) {
         console.log('not your colour');
         return;
     }
@@ -48,14 +42,9 @@ const promptUser = prompt => conif.getConsoleInput(prompt + ' ', false);
 
 const checkIfMoveIsValid = (selectedPiece, { x: x2, y: y2 }) => {
     const { x, y, type } = selectedPiece;
-    console.log(x, y, x2, y2);
-    
     const diffX = x2 - x;
     const diffY = y2 - y;
 
-    console.log(diffX);
-    console.log(diffY);
-    
     const destination = game.board[y2][x2];
 
     // console.log('destination', destination);
@@ -225,25 +214,30 @@ const fireLaser = turn => {
     }
 }
 
-const getUserActions = userInput => {
+const getUserInput = () => {
+    const userInput = promptUser(`e.g. c4 c5\n${game.turn}'s Turn:`);
+
     const [inputFrom, inputTo] = userInput.split(' ');
 
-    if (inputFrom.length !== 2) return;
+    if (inputFrom.length !== 2 || !inputTo) return userInputEvents.emit('getInput');
 
     const [fromXText, fromYText] = inputFrom;
-    if (!'abcdefghij'.includes(fromXText) || !'01234567'.includes(fromYText)) return;
+    if (!'abcdefghij'.includes(fromXText) || !'01234567'.includes(fromYText))
+        return userInputEvents.emit('getInput');
 
     const x = fromXText.charCodeAt(0) - 97;
     const y = parseInt(fromYText);
 
-    if ('lr'.includes(inputTo)) return { rotate: inputTo, start: { x, y } };
+    if ('lr'.includes(inputTo))
+        return userInputEvents.emit('userInput', { rotate: inputTo, start: { x, y } });
 
     const [toXText, toYText] = inputTo;
-    if (!'abcdefghij'.includes(toXText) || !'01234567'.includes(toYText)) return;
+    if (!'abcdefghij'.includes(toXText) || !'01234567'.includes(toYText))
+        return userInputEvents.emit('getInput');
     const toX = toXText.charCodeAt(0) - 97;
     const toY = parseInt(toYText);
 
-    return { start: { x, y }, move: { x: toX, y: toY } };
+    return userInputEvents.emit('userInput', { start: { x, y }, move: { x: toX, y: toY } });
 }
 
 const rotateLeft = {
@@ -286,32 +280,45 @@ const rotatePiece = (piece, rotate) => {
     }
 }
 
-const takeTurn = () => {
-    const userInput = promptUser(`e.g. c4 c5\n${game.turn}'s Turn:`);
-
-    const userActions = getUserActions(userInput);
-
-    if (!userActions) return;
+const takeTurn = userActions => {
+    if (!userActions) return userInputEvents.emit('getInput');
 
     const { start, move, rotate } = userActions;
 
     const selectedPiece = game.board[start.y][start.x];
 
-    if (!selectedPiece) return console.log(`nothing to move`);
-    if (selectedPiece.colour !== game.turn) return console.log(`not your piece`);
-    if (selectedPiece.type === 'laser' && move) return console.log(`you can't move your laser`);
+    if (!selectedPiece){
+        userInputEvents.emit('getInput')
+        return console.log(`nothing to move`)
+    }
+    if (selectedPiece.colour !== game.turn) {
+        userInputEvents.emit('getInput')
+        return console.log(`not your piece`)
+    }
+    if (selectedPiece.type === 'laser' && move) {
+        userInputEvents.emit('getInput')
+        return console.log(`you can't move your laser`);
+    } 
     
     if (move) {
         const validMove = checkIfMoveIsValid(selectedPiece, move);
-        if (!validMove) return console.log('invalid move');
+        if (!validMove) {
+            userInputEvents.emit('getInput')
+            return console.log('invalid move')
+        }
 
         swapPieces(validMove, selectedPiece);
 
+        userInputEvents.emit('finishTurn')
         return true;
     } else {
         const validRotate = rotatePiece(selectedPiece, rotate);
-        if (!validRotate) return console.log('invalid move');
+        if (!validRotate) {
+            userInputEvents.emit('getInput')
+            return console.log('invalid validRotate')
+        }
 
+        userInputEvents.emit('finishTurn')
         return true;
     }
 }
@@ -321,10 +328,10 @@ const gameLoop = () => {
 
     let moveTaken = false;
 
-    do {
-        moveTaken = takeTurn();
-    } while (!moveTaken);
+    userInputEvents.emit('getInput');
+}
 
+const finishTurn = () => {
     fireLaser(game.turn);
 
     game.turn = game.turn === 'red' ? 'white' : 'red';
@@ -335,5 +342,9 @@ const gameLoop = () => {
         gameLoop();
     }
 }
+
+userInputEvents.on('getInput', getUserInput);
+userInputEvents.on('userInput', takeTurn);
+userInputEvents.on('finishTurn', finishTurn);
 
 gameLoop();
