@@ -1,6 +1,6 @@
 const config = require('./config');
 
-const symbols = {
+const cornerSymbols = {
     RD: '◸',
     DL: '◹',
     UR: '◺',
@@ -14,14 +14,7 @@ const mirrorSymbols = {
     LU: '⟋',
 }
 
-const laserSymbol = {
-    U: '↟',
-    D: '↡',
-    L: '↞',
-    R: '↠'
-}
-
-const laserSymbol2 = {
+const laserSymbols = {
     U: '⇡',
     D: '⇣',
     L: '⇠',
@@ -73,13 +66,16 @@ const drawPieces = game => {
                     return draw('· ', 'grey');
                 }
                 return draw('  ', 'grey');
-            } 
-            if (piece.type === 'mirror') return draw(mirrorSymbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'king') return draw('♔ ', piece.colour);
-            if (piece.type === 'block') return draw(blockerSymbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'corner') return draw(symbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'laser') return draw(laserSymbol2[piece.rotation] + ' ', piece.colour);
-            throw Error('invalid type');
+            }
+            const { type, rotation, colour } = piece;
+            const symbolMapping = {
+                mirror: mirrorSymbols[rotation],
+                king: '♔',
+                block: blockerSymbols[rotation],
+                corner: cornerSymbols[rotation],
+                laser: laserSymbols[rotation],
+            }
+            draw(symbolMapping[type] + ' ', colour);
         })
         console.log('');
     })

@@ -53,6 +53,7 @@ const setupGame = () => {
     const game = {
         board: Array(8).fill().map(_ => Array(10).fill(null)),
         message: '',
+        turn: 'red',
     };
 
     config.defaultRedSetup.forEach((row, x) => row.forEach((piece, y) => setPiece(game.board, piece, x, y)));
