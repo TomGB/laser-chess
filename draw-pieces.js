@@ -45,13 +45,10 @@ const draw = (str, colour) => {
     }
 }
 
-const drawPieces = game => {
-    const { board, message } = game;
-
+const drawPieces = (board, message) => {
     process.stdout.write('\033c');
 
     console.log(message);
-    game.message = '';
 
     board.forEach((row, index) => {
         if (index === 0) {

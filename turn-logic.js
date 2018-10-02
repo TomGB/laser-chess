@@ -77,9 +77,8 @@ const rotatePiece = (game, piece, rotate) => {
 }
 
 const takeTurn = game => {
-    console.log('in take turn');
+    const userActions = getUserInput(game.turn);
     
-    const userActions = getUserInput(game);
     if (!userActions) return;
 
     const { start: { x, y }, move, rotate } = userActions;
