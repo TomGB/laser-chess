@@ -57,7 +57,7 @@ const moveLaser = laser => {
 }
 
 const runLaserPath = (game, laser) => {
-    const piece = game.board[laser.y][laser.x];
+    const piece = game.getPiece(laser.x, laser.y);
 
     game.laserPath.push(laser.direction);
 
@@ -85,16 +85,16 @@ const runLaserPath = (game, laser) => {
     if (hit) {
         console.log(game.laserPath.join(''));
         
-        game.message = `destroyed ${piece.colour}'s ${piece.type} in ${piece.x},${piece.y}`;
+        game.setMessage(`destroyed ${piece.colour}'s ${piece.type} in ${piece.x},${piece.y}`);
         
-        game.board[piece.y][piece.x] = null;
+        game.setPiece(piece.x, piece.y, null);
         return;
     }
 
     if (end) {
         console.log(game.laserPath.join(''));
 
-        game.won = game.turn === 'red' ? 'white': 'red';
+        game.won = game.getTurn() === 'red' ? 'white': 'red';
         return;
     }
 
@@ -103,21 +103,18 @@ const runLaserPath = (game, laser) => {
 
 const fireLaser = game => {
     game.laserPath = [];
-
-    const { turn, board } = game;
+    const turn = game.getTurn();
 
     if (turn === 'red') {
-        const redLaser = board[0][0];
+        const redLaser = game.getPiece(0, 0);
 
         if (redLaser.rotation === 'D') {
             runLaserPath(game, { x: 0, y: 1, direction: 'D' });
         } else {
             runLaserPath(game, { x: 1, y: 0, direction: 'R' });
         }
-    }
-
-    if (turn === 'white') {
-        const whiteLaser = board[height - 1][width - 1];
+    } else {
+        const whiteLaser = game.getPiece(width - 1, height - 1);
 
         if (whiteLaser.rotation === 'U') {        
             runLaserPath(game, { x: width - 1, y: height - 2, direction: 'U' });

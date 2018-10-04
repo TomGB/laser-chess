@@ -1,12 +1,14 @@
 const getUserInput = require('./get-user-input');
 const { restrictedLocations } = require('./config');
 
+const debug = true;
+
 const checkIfMoveIsValid = (game, selectedPiece, { x: x2, y: y2 }) => {
     const { x, y, type } = selectedPiece;
     const diffX = x2 - x;
     const diffY = y2 - y;
 
-    const destination = game.board[y2][x2];
+    const destination = game.getPiece(x2, y2);
     const restriction = restrictedLocations[y2][x2];
 
     if ((diffX > 1 || diffX < -1 || diffY > 1 || diffY < -1) && !debug)
@@ -27,10 +29,10 @@ const checkIfMoveIsValid = (game, selectedPiece, { x: x2, y: y2 }) => {
 }
 
 const swapPieces = (game, { x, y }, selectedPiece) => {
-    const temp = game.board[y][x];
+    const temp = game.getPiece(x, y);
     const { x: oldX, y: oldY } = selectedPiece;
-    game.board[y][x] = selectedPiece;
-    game.board[oldY][oldX] = temp;
+    game.setPiece(x, y, selectedPiece);
+    game.setPiece(oldX, oldY, temp);
     selectedPiece.x = x;
     selectedPiece.y = y;
     if (temp) {
@@ -56,7 +58,7 @@ const rotateRight = {
 const rotatePiece = (game, piece, rotate) => {
     const { type, rotation } = piece;
     if (type === 'laser') {
-        if (game.turn === 'red') {
+        if (game.getTurn() === 'red') {
             if (rotation === 'D' && rotate === 'l') {
                 return 'R';
             } else if (rotation === 'R' && rotate === 'r') {
@@ -77,16 +79,16 @@ const rotatePiece = (game, piece, rotate) => {
 }
 
 const takeTurn = game => {
-    const userActions = getUserInput(game.turn);
+    const userActions = getUserInput(game.getTurn());
     
     if (!userActions) return;
 
     const { start: { x, y }, move, rotate } = userActions;
 
-    const selectedPiece = game.board[y][x];
+    const selectedPiece = game.getPiece(x, y);
 
     if (!selectedPiece) return console.log(`nothing to move`);
-    if (selectedPiece.colour !== game.turn) return console.log(`not your piece`)
+    if (selectedPiece.colour !== game.getTurn()) return console.log(`not your piece`)
     if (selectedPiece.type === 'laser' && move) return console.log(`you can't move your laser`)
     
     if (move) {

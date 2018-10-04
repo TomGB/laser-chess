@@ -3,18 +3,20 @@ const fireLaser = require('./fire-laser');
 const { takeTurnLoop } = require('./turn-logic');
 
 const gameLoop = game => {
-    console.log('in game loop');
-    
-    drawPieces(game.board, game.message);
+    drawPieces(game);
     game.message = '';
     takeTurnLoop(game);
     fireLaser(game);
 
-    game.turn = game.turn === 'red' ? 'white' : 'red';
+    console.log('banana');
+    
+    console.log(game.flipTurn());
 
     if (game.won) {
-        console.log(`Finished! Game won by ${game.won}`);
-        return `Finished! Game won by ${game.won}`;
+        drawPieces(game);
+        const outcome = `Finished! Game won by ${game.won}`;
+        console.log(outcome);
+        return outcome;
     }
     
     return gameLoop(game);

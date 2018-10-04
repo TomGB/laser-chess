@@ -5,7 +5,7 @@ jest.mock('../get-user-input', () => mockUserInput);
 jest.mock('../draw-pieces', () => mockDrawPieces);
 
 const gameLoop = require('../game-loop');
-const setupGame = require('../setup-game');
+const Game = require('../Game');
 
 const mockMove = move => mockUserInput.mockImplementationOnce(() => move);
 
@@ -16,14 +16,14 @@ test('getUserInput is called', () => {
         { start: { x: 0 , y: 0 }, rotate: 'l' },
     ].forEach(mockMove);
 
-    const game = setupGame();
-    expect(game).toMatchSnapshot('Initial game');
+    const game = new Game();
+    expect(game.getBoardShorthand()).toMatchSnapshot('Initial game');
     const outcome = gameLoop(game);
 
     expect(outcome).toEqual('Finished! Game won by white')
 
-    mockDrawPieces.mock.calls.forEach(([ call ]) =>
-        expect(call).toMatchSnapshot('Board state each turn')
+    mockDrawPieces.mock.calls.forEach(([ game ]) =>
+        expect(game.getBoard()).toMatchSnapshot('Board state each turn')
     );
     mockUserInput.mock.calls.forEach(([ call ]) => 
         expect(call).toMatchSnapshot('Each turn')

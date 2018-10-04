@@ -1,5 +1,5 @@
-const setupGame = require('./setup-game');
+const Game = require('./Game');
 const gameLoop = require('./game-loop');
 
-const game = setupGame();
+const game = new Game();
 gameLoop(game);

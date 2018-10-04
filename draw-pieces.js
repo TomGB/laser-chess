@@ -45,38 +45,47 @@ const draw = (str, colour) => {
     }
 }
 
-const drawPieces = (board, message) => {
+const getSymbol = ({ type, rotation}) => {
+    const symbolMapping = {
+        mirror: mirrorSymbols[rotation],
+        king: '♔',
+        block: blockerSymbols[rotation],
+        corner: cornerSymbols[rotation],
+        laser: laserSymbols[rotation],
+    };
+
+    return symbolMapping[type];
+}
+
+const drawRestriction = colour => draw('· ', colour === 'red' ? 'greyred' : 'grey');
+
+const drawPieces = game => {
     process.stdout.write('\033c');
 
-    console.log(message);
+    console.log(game.getMessage());
+    console.log('\n    a b c d e f g h i j\n');
 
-    board.forEach((row, index) => {
-        if (index === 0) {
-            console.log('\n    a b c d e f g h i j\n');
+    game.getBoardPositions().forEach(({ x, y }) => {
+        const piece = game.getPiece(x, y);
+
+        if (x === 0) draw(y + '   ');
+        if (!piece) {
+            const restriction = config.restrictedLocations[y][x];
+            if (restriction) {
+                drawRestriction(restriction)
+            } else {
+                draw('  ', 'grey');
+            }
+        } else {
+            const { colour } = piece;
+
+            draw(getSymbol(piece) + ' ', colour);
         }
-        row.forEach((piece, xIndex) => {
-            if (xIndex === 0) draw(index + '   ');
-            if (!piece) {
-                if (config.restrictedLocations[index][xIndex] === 'red') {
-                    return draw('· ', 'greyred');
-                } else if (config.restrictedLocations[index][xIndex] === 'white') {
-                    return draw('· ', 'grey');
-                }
-                return draw('  ', 'grey');
-            }
-            const { type, rotation, colour } = piece;
-            const symbolMapping = {
-                mirror: mirrorSymbols[rotation],
-                king: '♔',
-                block: blockerSymbols[rotation],
-                corner: cornerSymbols[rotation],
-                laser: laserSymbols[rotation],
-            }
-            draw(symbolMapping[type] + ' ', colour);
-        })
-        console.log('');
-    })
-    console.log('');
+
+        if (x === config.width - 1) {
+            console.log('');
+        }
+    });
 }
 
 module.exports = drawPieces;
