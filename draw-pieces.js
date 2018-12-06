@@ -1,14 +1,6 @@
-const config = {
-    width: 10,
-    height: 8,
-    restrictedLocations: [
-        ['none', 'white', ...Array(6), 'red', 'white'],
-        ...Array(6).fill().map(() => ['red', ...Array(8), 'white']),
-        ['red', 'white', ...Array(6), 'red', 'none']
-    ],
-}
+const config = require('./config');
 
-const symbols = {
+const cornerSymbols = {
     RD: '◸',
     DL: '◹',
     UR: '◺',
@@ -22,14 +14,7 @@ const mirrorSymbols = {
     LU: '⟋',
 }
 
-const laserSymbol = {
-    U: '↟',
-    D: '↡',
-    L: '↞',
-    R: '↠'
-}
-
-const laserSymbol2 = {
+const laserSymbols = {
     U: '⇡',
     D: '⇣',
     L: '⇠',
@@ -41,23 +26,6 @@ const blockerSymbols = {
     L: '⤪',
     D: '⤩',
     R: '⤨'
-}
-
-const printColours = board => {
-    board.forEach((row, index) => {
-        if (index === 0) {
-            console.log('\n\n    a b c d e f g h i j\n');
-        }
-        row.forEach((piece, xIndex) => {
-            if (xIndex === 0) process.stdout.write(index + '   ');
-            if (!piece) return process.stdout.write('_ ');
-            if (piece.colour === 'red') return process.stdout.write('R ');
-            if (piece.colour === 'white') return process.stdout.write('W ');
-            throw Error('invalid colour');
-        })
-        console.log('');
-    })
-    console.log('');
 }
 
 const COLOUR_END = '\x1b[0m';
@@ -77,33 +45,47 @@ const draw = (str, colour) => {
     }
 }
 
-const drawPieces = board => {
+const getSymbol = ({ type, rotation}) => {
+    const symbolMapping = {
+        mirror: mirrorSymbols[rotation],
+        king: '♔',
+        block: blockerSymbols[rotation],
+        corner: cornerSymbols[rotation],
+        laser: laserSymbols[rotation],
+    };
+
+    return symbolMapping[type];
+}
+
+const drawRestriction = colour => draw('· ', colour === 'red' ? 'greyred' : 'grey');
+
+const drawPieces = game => {
     process.stdout.write('\033c');
 
-    board.forEach((row, index) => {
-        if (index === 0) {
-            console.log('\n    a b c d e f g h i j\n');
+    console.log(game.getMessage());
+    console.log('\n    a b c d e f g h i j\n');
+
+    game.getBoardPositions().forEach(({ x, y }) => {
+        const piece = game.getPiece(x, y);
+
+        if (x === 0) draw(y + '   ');
+        if (!piece) {
+            const restriction = config.restrictedLocations[y][x];
+            if (restriction) {
+                drawRestriction(restriction)
+            } else {
+                draw('  ', 'grey');
+            }
+        } else {
+            const { colour } = piece;
+
+            draw(getSymbol(piece) + ' ', colour);
         }
-        row.forEach((piece, xIndex) => {
-            if (xIndex === 0) draw(index + '   ');
-            if (!piece) {
-                if (config.restrictedLocations[index][xIndex] === 'red') {
-                    return draw('· ', 'greyred');
-                } else if (config.restrictedLocations[index][xIndex] === 'white') {
-                    return draw('· ', 'grey');
-                }
-                return draw('  ', 'grey');
-            } 
-            if (piece.type === 'mirror') return draw(mirrorSymbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'king') return draw('♔ ', piece.colour);
-            if (piece.type === 'block') return draw(blockerSymbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'corner') return draw(symbols[piece.rotation] + ' ', piece.colour);
-            if (piece.type === 'laser') return draw(laserSymbol2[piece.rotation] + ' ', piece.colour);
-            throw Error('invalid type');
-        })
-        console.log('');
-    })
-    console.log('');
+
+        if (x === config.width - 1) {
+            console.log('');
+        }
+    });
 }
 
 module.exports = drawPieces;

@@ -4,13 +4,17 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test-int": "jest ./integration-tests",
+    "restart": "node app.js",
+    "start": "node app.js"
+
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tomgb/laser-chess.git"
   },
-  "author": "",
+  "author": "Tom Banister",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tomgb/laser-chess/issues"
@@ -18,5 +22,8 @@
   "homepage": "https://github.com/tomgb/laser-chess#readme",
   "dependencies": {
     "node-console-input": "^1.1.1"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
   }
 }
