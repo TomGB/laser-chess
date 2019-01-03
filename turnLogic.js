@@ -1,4 +1,4 @@
-const getUserInput = require('./get-user-input');
+const getUserInput = require('./getUserInput');
 const { restrictedLocations } = require('./config');
 
 const debug = true;

@@ -1,6 +1,6 @@
-const drawPieces = require('./draw-pieces');
-const fireLaser = require('./fire-laser');
-const { takeTurnLoop } = require('./turn-logic');
+const drawPieces = require('./drawPieces');
+const fireLaser = require('./fireLaser');
+const { takeTurnLoop } = require('./turnLogic');
 
 const gameLoop = game => {
     drawPieces(game);
