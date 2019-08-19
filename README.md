@@ -1,3 +1,19 @@
 # laser-chess
 
-Currently a CLI implimentation of the board game Laser Chess
+## API
+
+New game
+
+get board (and turn)
+
+get board ascii
+
+set board (and turn)
+
+is move valid
+
+make move
+
+### stretch
+
+list valid moves
