@@ -84,9 +84,11 @@ const runLaserPath = (game, laser) => {
 
     if (hit) {
         console.log(game.laserPath.join(''));
-        
-        game.setMessage(`destroyed ${piece.colour}'s ${piece.type} in ${piece.x},${piece.y}`);
-        
+
+        const alpha = 'abcdefghij'.split('')
+
+        game.setMessage(`destroyed ${piece.colour}'s ${piece.type} in ${alpha[piece.x]},${piece.y}`);
+
         game.setPiece(piece.x, piece.y, null);
         return;
     }
@@ -116,7 +118,7 @@ const fireLaser = game => {
     } else {
         const whiteLaser = game.getPiece(width - 1, height - 1);
 
-        if (whiteLaser.rotation === 'U') {        
+        if (whiteLaser.rotation === 'U') {
             runLaserPath(game, { x: width - 1, y: height - 2, direction: 'U' });
         } else {
             runLaserPath(game, { x: width - 2, y: height - 1, direction: 'L' });

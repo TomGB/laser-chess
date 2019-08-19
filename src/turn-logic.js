@@ -1,4 +1,4 @@
-const getUserInput = require('./getUserInput');
+const getUserInput = require('./get-user-input');
 const { restrictedLocations } = require('./config');
 
 const debug = true;
@@ -12,10 +12,10 @@ const checkIfMoveIsValid = (game, selectedPiece, { x: x2, y: y2 }) => {
     const restriction = restrictedLocations[y2][x2];
 
     if ((diffX > 1 || diffX < -1 || diffY > 1 || diffY < -1) && !debug)
-    return console.log(`can't move more than 1 space`);
+        return console.log(`can't move more than 1 space`);
 
     if (restriction && restriction !== selectedPiece.colour)
-        return console.log(`restricted space, ${restriction} only`);
+        return console.log(`restricted space, ${restriction} pieces only`);
 
     if (!destination) return { x: x2, y: y2 }
 
@@ -80,7 +80,7 @@ const rotatePiece = (game, piece, rotate) => {
 
 const takeTurn = game => {
     const userActions = getUserInput(game.getTurn());
-    
+
     if (!userActions) return;
 
     const { start: { x, y }, move, rotate } = userActions;
@@ -90,7 +90,7 @@ const takeTurn = game => {
     if (!selectedPiece) return console.log(`nothing to move`);
     if (selectedPiece.colour !== game.getTurn()) return console.log(`not your piece`)
     if (selectedPiece.type === 'laser' && move) return console.log(`you can't move your laser`)
-    
+
     if (move) {
         const validMove = checkIfMoveIsValid(game, selectedPiece, move);
         if (!validMove) return console.log('invalid move');
@@ -108,7 +108,7 @@ const takeTurn = game => {
 
 const takeTurnLoop = game => {
     console.log('in turn loop');
-    
+
     const turnTaken = takeTurn(game);
     if (!turnTaken) takeTurnLoop(game);
     return true;

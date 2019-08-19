@@ -1,6 +1,6 @@
-const drawPieces = require('./drawPieces');
-const fireLaser = require('./fireLaser');
-const { takeTurnLoop } = require('./turnLogic');
+const drawPieces = require('./draw-pieces');
+const fireLaser = require('./fire-laser');
+const { takeTurnLoop } = require('./turn-logic');
 
 const gameLoop = game => {
     drawPieces(game);
@@ -8,8 +8,6 @@ const gameLoop = game => {
     takeTurnLoop(game);
     fireLaser(game);
 
-    console.log('banana');
-    
     console.log(game.flipTurn());
 
     if (game.won) {
@@ -18,7 +16,7 @@ const gameLoop = game => {
         console.log(outcome);
         return outcome;
     }
-    
+
     return gameLoop(game);
 }
 
