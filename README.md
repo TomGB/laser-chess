@@ -2,18 +2,17 @@
 
 ## API
 
-New game
+chess.newGame = () => ({ board: [], turn: '' })
 
-get board (and turn)
+chess.toAscii = ({ board: [], turn: '' }) => ''
 
-get board ascii
-
-set board (and turn)
-
-is move valid
-
-make move
+chess.makeMove = ({ board, turn }, move) => ({
+  beforeLaser: { board, turn },
+  afterLaser: { board, turn },
+  outcome: 'description',
+  error: 'cant go there',
+})
 
 ### stretch
 
-list valid moves
+chess.getValidMoves = ({ board: [], turn: '' }) => [{ from: { x, y }, to: { x, y } }, ...]
