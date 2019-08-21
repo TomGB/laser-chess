@@ -2,17 +2,17 @@
 
 ## API
 
-chess.newGame = () => ({ board: [], turn: '' })
+chess.newGame = () => ({ boardRestrictions: [], pieces: [], turn: '' })
 
-chess.toAscii = ({ board: [], turn: '' }) => ''
+chess.toAscii = ({ boardRestrictions: [], pieces: [], turn: '' }) => ''
 
-chess.makeMove = ({ board, turn }, move) => ({
-  beforeLaser: { board, turn },
-  afterLaser: { board, turn },
+chess.makeMove = ({ boardRestrictions: [], pieces, turn }, { from: { x, y }, to: { x, y }, rotate: 'l'/'r' }) => ({
+  beforeLaser: { boardRestrictions: [], pieces, turn },
+  afterLaser: { boardRestrictions: [], pieces, turn },
   outcome: 'description',
   error: 'cant go there',
 })
 
 ### stretch
 
-chess.getValidMoves = ({ board: [], turn: '' }) => [{ from: { x, y }, to: { x, y } }, ...]
+chess.getValidMoves = ({ boardRestrictions, pieces: [], turn: '' }) => [{ from: { x, y }, to: { x, y } }, ...]
